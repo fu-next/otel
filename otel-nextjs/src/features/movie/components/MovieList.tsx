@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Movie } from "../schemas/movie";
 import { getMovies } from "../server/actions/movie";
+import { SpanStatusCode, trace } from "@opentelemetry/api";
 
 export default function MovieList() {
 
@@ -10,11 +11,17 @@ export default function MovieList() {
     const [movies, setMovies] = useState<Movie[]>([]);
     useEffect(() => {
         const fetchData = async () => {
-            const data =  fetch("/api/movies");
-            const result = await (await data).json();
-            setMovies(result);
+            await trace.getTracer("sample").startActiveSpan("MovieList", async (span) => {
+                try {
+                    const data = await fetch("/api/movies");
+                    const result = await data.json();
+                    console.log(result)
+                    setMovies(result);
+                } finally {
+                    span.end()
+                }
+            })
         }
-
         fetchData();
     }, [])
 
