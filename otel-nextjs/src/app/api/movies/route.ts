@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
       console.log('line 11');
       const headers = {
         ...request.headers,
-        'traceparent': traceParent
+        'traceparent': traceParent,
+        'tracestate': activeSpan?.spanContext().traceState,
       }
       const data = await fetch('http://localhost:8080/demo/movies', {headers})
       console.log('line 13');
