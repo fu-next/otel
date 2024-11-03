@@ -5,48 +5,40 @@ import { Movie } from "../schemas/movie";
 import { getMovies } from "../server/actions/movie";
 import { context, SpanStatusCode, trace, } from "@opentelemetry/api";
 
-export default function MovieList() {
+export default function MovieList({ traceParent, parentSpanId }) {
 
     // const movies: Movie[] = await getMovies();
     const [movies, setMovies] = useState<Movie[]>([]);
 
     useEffect(() => {
-
-
+        console.log('line 14: ' + traceParent)
         const fetchData = async () => {
-            await trace.getTracer("sample").startActiveSpan("MovieList", async (span) => {
-                try {
-                    const currentSpan = trace.getSpan(context.active());
-
-                    if (currentSpan) {
-                        const parentSpanId = currentSpan.spanContext().spanId;
-                        console.log('Parent Span ID:', parentSpanId);
-                    } else {
-                        console.log('bbNo active span found.');
+            const span = trace.getTracer("sample").startSpan("fetch-movies", {
+                links: [{
+                    context: {
+                        traceId: traceParent, spanId: parentSpanId,
+                        traceFlags: 0
                     }
+                }]
+            });
 
-                    const activeSpan = trace.getSpan(context.active())
-                    const traceParent = activeSpan ? `00-${activeSpan.spanContext().traceId}-${activeSpan.spanContext().spanId}-01` : '';
-                    const tracestate = activeSpan?.spanContext().traceState?.serialize();
-                    console.log('line 32: ' + traceParent)
-                    const headers: HeadersInit = {
-                        // ...request.headers,
-                        'traceparent': traceParent,
-                        'tracestate': tracestate ? tracestate : '',
+            const activeSpan = trace.setSpan(context.active(), span);
+            const traceparent = `00-${traceParent}-${parentSpanId}-01`;
+
+            try {
+                const data = await fetch("/api/movies", {
+                    headers: {
+                        traceparent
                     }
-
-                    const data = await fetch("/api/movies", { headers });
-                    const result = await data.json();
-                    console.log(result)
-                    setMovies(result);
-                } finally {
-                    span.end()
-                }
-            })
-        }
+                });
+                const result = await data.json();
+                setMovies(result);
+            } finally {
+                span.end();
+            }
+        };
         fetchData();
-
-    }, [])
+    }, []);
 
     return (
         <div>
