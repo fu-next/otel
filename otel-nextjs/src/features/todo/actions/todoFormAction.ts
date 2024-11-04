@@ -1,6 +1,9 @@
-import { TodoFormState } from "../schemas/todoSchema"
+'use server'
+
+import { TodoFormState } from '../schemas/todoSchema'
 import { z, ZodError } from 'zod'
-import { insertTodo } from "./todoAction"
+import { insertTodo } from './todoAction'
+import {v4 as uuidV4} from 'uuid'
 
 const formSchema = z.object({
     name: z.string({
@@ -14,7 +17,6 @@ const formSchema = z.object({
 })
 
 export async function submitForm(prevFormData: TodoFormState, formData: FormData): Promise<TodoFormState> {
-    console.log('line 17')
     const name = formData.get('name') as string
     const description = formData.get('description') as string
     try {
@@ -27,7 +29,7 @@ export async function submitForm(prevFormData: TodoFormState, formData: FormData
 
         insertTodo(
             {
-                seq: -1,
+                uuid: uuidV4().toString(),
                 name: name,
                 description: description,
                 createDate: new Date(),
@@ -39,7 +41,7 @@ export async function submitForm(prevFormData: TodoFormState, formData: FormData
             message: 'success',
             error: undefined,
             fieldValues: {
-                seq: -1,
+                uuid: '',
                 name: '',
                 description: '',
                 createDate: new Date(),
@@ -52,14 +54,14 @@ export async function submitForm(prevFormData: TodoFormState, formData: FormData
         return {
             message: zodError.message,
             error: {
-                seq: errorMap['seq'] ? errorMap['seq'][0] : '',
+                uuid: errorMap['uuid'] ? errorMap['uuid'][0] : '',
                 name: errorMap['name'] ? errorMap['name'][0] : '',
                 description: errorMap['description'] ? errorMap['description'][0] : '',
                 createDate: errorMap['createDate'] ? errorMap['createDate'][0] : '',
                 updateDate: errorMap['updateDate'] ? errorMap['updateDate'][0] : '',
             },
             fieldValues: {
-                seq: -1,
+                uuid: '',
                 name: name,
                 description: description,
                 createDate: new Date(),

@@ -1,6 +1,6 @@
 
 export type Todo = {
-    seq: number,
+    uuid: string,
     name: string,
     description: string,
     createDate: Date,

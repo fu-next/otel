@@ -5,6 +5,7 @@ import TodoForm from '@/app/todoForm/page'
 import Modal from '@mui/material/Modal'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { context, trace } from "@opentelemetry/api";
 
 export default function TodoFormModal() {
 
@@ -24,7 +25,7 @@ export default function TodoFormModal() {
                 aria-describedby='modal-modal-description'
             >
                 <div className={styles.modal}>
-                    <TodoForm></TodoForm>
+                    <TodoForm params={{ handleClose: handleClose }}></TodoForm>
                 </div>
             </Modal>
         </div>

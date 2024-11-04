@@ -2,16 +2,22 @@
 
 import { submitForm } from "@/features/todo/actions/todoFormAction";
 import { TodoFormState } from "@/features/todo/schemas/todoSchema";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useActionState, useEffect, useRef } from "react";
 
-export default function TodoForm() {
+export default function TodoForm({ params }: {
+    params: {
+        handleClose: () => void
+    }
+}) {
 
-    const formRef = useRef<HTMLFormElement>();
+    const router = useRouter()
+    const formRef = useRef<HTMLFormElement>()
     const [formState, formAction, isPending] = useActionState(submitForm, {
         message: '',
         error: undefined,
         fieldValues: {
-            seq: 0,
+            uuid: '',
             name: '',
             description: '',
             createDate: new Date(),
@@ -26,6 +32,8 @@ export default function TodoForm() {
     useEffect(() => {
         if (formState.message === 'success') {
             formRef.current?.reset()
+            params.handleClose()
+            router.push('/todo')
         }
     }, [formState]);
 

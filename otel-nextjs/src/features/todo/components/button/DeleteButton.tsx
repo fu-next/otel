@@ -2,10 +2,10 @@
 
 import { Todo } from "../../schemas/todoSchema";
 
-export default function DeleteButton({ params }: { params: { todo: Todo, gg: (todo: Todo) => Promise<Boolean> } }) {
+export default function DeleteButton({ params }: { params: { todo: Todo, deleteTodo: (todo: Todo) => Promise<Boolean> } }) {
 
     const handleOnClick = () => {
-        params.gg(params.todo)
+        params.deleteTodo(params.todo)
     }
 
     return (
